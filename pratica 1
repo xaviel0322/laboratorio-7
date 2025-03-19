@@ -1,0 +1,46 @@
+maquina servidor:
+
+sudo mkdir -p /var/nfs/os3
+
+cd /var/nfs/os3
+
+touch Adrian{1..100}.txt 
+
+nano /etc/exports
+
+
+/var/nfs/os3 192.168.0.109/24(rw,sync,no_root_squash)
+
+sudo chmod 766 /var/nfs/os3
+
+sudo chown nobody:nobody /var/nfs/os3
+
+sudo exportfs -arv
+
+
+
+sudo firewall-cmd --permanent --add-service=nfs
+sudo firewall-cmd --permanent --add-service=rpc-bind
+sudo firewall-cmd --permanent --add-service=mountd
+sudo firewall-cmd --reload
+
+luego hacemos lo mismo en nuestra maquina cliente
+
+sudo firewall-cmd --permanent --add-service=nfs
+sudo firewall-cmd --permanent --add-service=rpc-bind
+sudo firewall-cmd --permanent --add-service=mountd
+sudo firewall-cmd --reload
+
+maquina cliente
+
+sudo mkdir -p /mnt/os3
+sudo mount -t nfs 192.168.0.200:/var/nfs/os3 /mnt/os3
+df -h
+cd /mnt/os3/
+ls
+
+esto es para que se guarde en cada reinicio.
+sudo nano /etc/fstab
+192.168.0.200:/var/nfs/os3 /mnt/os3 nfs auto,nofail,noatime,nolock,intr,tcp,actimeo=1800 0 0
+
+por ultimo el reboot
