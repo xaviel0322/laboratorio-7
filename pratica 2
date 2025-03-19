@@ -1,0 +1,85 @@
+sudo dnf install samba samba-client samba-common -y
+
+
+# iniciar y habilitat los servicios SMB y NMB.
+
+systemctl start smb
+
+systemctl enable smb
+
+systemctl start nmb
+
+systemctl enable nmb
+
+
+
+# crear el directorio compartido y asignar permisos.
+
+sudo mkdir -P /srv/samba/carro
+
+sudo chmod -R 0777 /srv/samba/carro
+
+sudo chown nobody:nobody /srv/samba/carro
+
+sudo chcon -t samba_share_t /srv/samba/carro
+
+
+
+#crear archivos de pruebas. 
+
+cd /srv/samba/
+
+sudo touch adrian{1..100}.txt
+
+
+
+#configurar el firewall.
+
+sudo firewall-cmd --add-service=samba --permanent
+
+sudo firewall-cmd --reload
+
+
+
+# Editar el archivo de configuracion de samba.
+
+sudo nano /etc/samba/smb.conf
+
+
+
+# Añadir la configuravion para el recurso compartido publico.
+
+[public]
+ path = /srv/samba/carro
+ browsable = yes
+ writable = yes
+ guest ok = no
+
+
+
+# Crear un grupo y usuario para samba.
+
+sudo groupadd sambasusers
+
+sudo useradd joa -p joa12345
+
+sudo usermod -aG sambasusers joa
+
+sudo smbpasswd -a joa # (ingresar contraseña: joa12345
+
+groups joa
+
+
+
+# reiniciar los servicios SMB Y NMB.
+
+sudo systemctl restart nmb
+
+sudo systemctl restart smb
+
+
+
+# colocar ip por ultimo
+
+\\192.168.0.200\
+
